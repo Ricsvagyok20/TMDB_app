@@ -3,7 +3,7 @@ import 'package:hive/hive.dart';
 import 'package:tmdb_app/common_usage_widgets/movie_card.dart';
 import 'package:tmdb_app/database/db.dart';
 import 'package:tmdb_app/models/movie.dart';
-import 'package:tmdb_app/pages/single_movie.dart';
+import 'package:tmdb_app/pages/detailed_movie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

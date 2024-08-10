@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:tmdb_app/database/db.dart';
 import 'package:tmdb_app/models/movie.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +22,8 @@ class _DetailedMovieState extends State<DetailedMovie> {
   late Movie movie;
 
   Future<void> _getMovie() async {
+    var box = Hive.box('cacheBox');
+
     try {
       final moviesRes =
           await db.getMovie('${widget.movieId}', widget.languageCode);
@@ -31,6 +34,25 @@ class _DetailedMovieState extends State<DetailedMovie> {
     } catch (e) {
       setState(() {
         print('Error $e');
+
+        List<dynamic> cachedData = box.get('movies', defaultValue: []);
+
+        List<Movie> movies = cachedData.map<Movie>((json) {
+          Map<String, dynamic> temp = Map<String, dynamic>.from(json);
+          return Movie.fromJson(temp);
+        }).toList();
+
+        Movie? temp;
+
+        for (Movie i in movies) {
+          if (i.id == widget.movieId) {
+            temp = i;
+          }
+        }
+
+        if (temp != null) {
+          movie = temp;
+        }
         isLoading = false;
         errorMessage = 'Failed to load movie details.';
       });
@@ -64,6 +86,13 @@ class _DetailedMovieState extends State<DetailedMovie> {
                       'https://image.tmdb.org/t/p/w200${movie.posterPath}',
                       fit: BoxFit.cover,
                       width: 100,
+                      errorBuilder: (BuildContext context, Object exception,
+                          StackTrace? stackTrace) {
+                        return Container(
+                          color: Colors.grey,
+                          child: const Icon(Icons.error, color: Colors.white),
+                        );
+                      },
                     ),
                   ),
                 ),

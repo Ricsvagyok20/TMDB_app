@@ -18,8 +18,6 @@ class Database {
     var box = Hive.box('cacheBox');
     box.put('movies', res.data['results']);
 
-    //print(res.data['results'][0].runtimeType);
-
     List<Movie> movies = (res.data['results'] as List)
         .map((json) => Movie.fromJson(json))
         .toList();
@@ -31,7 +29,6 @@ class Database {
     final res = await getRequest('$baseUrl/movie/$movieId',
         queryParameters: queryParameters);
 
-    print(res.data);
     return Movie.fromJson(res.data);
   }
 
