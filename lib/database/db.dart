@@ -9,20 +9,35 @@ class Database {
   final String baseUrl = "https://api.themoviedb.org/3";
   final dio = Dio();
 
-  Future<List<Movie>> getMovies({String? language}) async {
-    final res = await getRequest('$baseUrl/movie/popular');
-    print(res.data);
+  Future<List<Movie>> getMovies(String language) async {
+    Map<String, dynamic> queryParameters = {'language': language};
+    final res = await getRequest('$baseUrl/movie/popular',
+        queryParameters: queryParameters);
+
     List<Movie> movies = (res.data['results'] as List)
         .map((json) => Movie.fromJson(json))
         .toList();
     return movies;
   }
 
-  dynamic getRequest(String url, {Map<String, Object>? params}) async {
+  Future<Movie> getMovie(String movieId, String language) async {
+    Map<String, dynamic> queryParameters = {'language': language};
+    final res = await getRequest('$baseUrl/movie/$movieId',
+        queryParameters: queryParameters);
+
+    print(res.data);
+    return Movie.fromJson(res.data);
+  }
+
+  dynamic getRequest(String url,
+      {Map<String, dynamic>? queryParameters}) async {
+    if (queryParameters == null) {
+      queryParameters = {'api_key': tmdbApiKey};
+    } else {
+      queryParameters['api_key'] = tmdbApiKey;
+    }
     final res = await dio.get(url,
-        queryParameters: {
-          'api_key': tmdbApiKey,
-        },
+        queryParameters: queryParameters,
         options: Options(headers: {
           'Authorization': 'Bearer $tmdbAccessToken',
           Headers.contentTypeHeader: 'application/json',

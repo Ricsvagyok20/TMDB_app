@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:tmdb_app/models/movie.dart';
-import 'package:tmdb_app/pages/single_movie.dart';
 
 class MovieCard extends StatelessWidget {
   final Movie movie;
+  final void Function() navToSingleMovie;
 
-  const MovieCard({super.key, required this.movie});
+  const MovieCard(
+      {super.key, required this.movie, required this.navToSingleMovie});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => SingleMovie(movie: movie))),
+      onTap: navToSingleMovie,
       child: Stack(
         children: [
           Container(
@@ -53,7 +53,7 @@ class MovieCard extends StatelessWidget {
                               const Icon(Icons.favorite,
                                   color: Colors.red, size: 16),
                               const SizedBox(width: 4),
-                              Text(movie.popularity.toString()),
+                              Text(movie.popularity.toStringAsFixed(1)),
                             ],
                           ),
                           const SizedBox(height: 5),

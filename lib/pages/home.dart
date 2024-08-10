@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tmdb_app/common_usage_widgets/movie_card.dart';
 import 'package:tmdb_app/database/db.dart';
 import 'package:tmdb_app/models/movie.dart';
+import 'package:tmdb_app/pages/single_movie.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,10 +18,12 @@ class _HomePageState extends State<HomePage> {
   List<Movie>? movies;
   List<Movie>? filteredMovies;
   String searchQuery = '';
+  String languageCode = 'en-US';
+  bool isEnglish = true;
 
   Future<void> _getMovies() async {
     try {
-      final moviesRes = await db.getMovies();
+      final moviesRes = await db.getMovies(languageCode);
       setState(() {
         movies = moviesRes;
         filteredMovies = moviesRes;
@@ -43,6 +46,14 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _toggleLanguage() {
+    setState(() {
+      isEnglish = !isEnglish;
+      languageCode = isEnglish ? 'en-US' : 'hu-HU';
+      _getMovies();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +66,14 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Center(child: Text("Movies")),
+        actions: [
+          IconButton(
+            icon: isEnglish
+                ? Image.asset('assets/american_flag.jpg')
+                : Image.asset('assets/hungarian_flag.png'),
+            onPressed: _toggleLanguage,
+          ),
+        ],
       ),
       body: isLoading
           ? Center(
@@ -83,7 +102,16 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(8),
                     itemCount: filteredMovies!.length,
                     itemBuilder: (context, index) {
-                      return MovieCard(movie: filteredMovies![index]);
+                      return MovieCard(
+                        movie: filteredMovies![index],
+                        navToSingleMovie: () =>
+                            Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => DetailedMovie(
+                            movieId: filteredMovies![index].id,
+                            languageCode: languageCode,
+                          ),
+                        )),
+                      );
                     },
                   ),
                 ),
