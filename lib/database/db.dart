@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive/hive.dart';
 import 'package:tmdb_app/models/movie.dart';
 import 'package:tmdb_app/secrets/secrets.dart';
 
@@ -13,6 +14,11 @@ class Database {
     Map<String, dynamic> queryParameters = {'language': language};
     final res = await getRequest('$baseUrl/movie/popular',
         queryParameters: queryParameters);
+
+    var box = Hive.box('cacheBox');
+    box.put('movies', res.data['results']);
+
+    //print(res.data['results'][0].runtimeType);
 
     List<Movie> movies = (res.data['results'] as List)
         .map((json) => Movie.fromJson(json))

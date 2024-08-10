@@ -89,6 +89,13 @@ class MovieCard extends StatelessWidget {
                     ? Image.network(
                         'https://image.tmdb.org/t/p/w200${movie.posterPath}',
                         fit: BoxFit.fitHeight,
+                        errorBuilder: (BuildContext context, Object exception,
+                            StackTrace? stackTrace) {
+                          return Container(
+                            color: Colors.grey,
+                            child: const Icon(Icons.error, color: Colors.white),
+                          );
+                        },
                       )
                     : Container(color: Colors.grey),
               ),

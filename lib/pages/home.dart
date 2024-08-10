@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:tmdb_app/common_usage_widgets/movie_card.dart';
 import 'package:tmdb_app/database/db.dart';
 import 'package:tmdb_app/models/movie.dart';
@@ -14,25 +15,34 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Database db;
   bool isLoading = true;
-  String errorMessage = '';
   List<Movie>? movies;
   List<Movie>? filteredMovies;
+
   String searchQuery = '';
   String languageCode = 'en-US';
   bool isEnglish = true;
 
   Future<void> _getMovies() async {
+    var box = Hive.box('cacheBox');
+
     try {
       final moviesRes = await db.getMovies(languageCode);
       setState(() {
         movies = moviesRes;
-        filteredMovies = moviesRes;
+        filteredMovies = movies;
         isLoading = false;
       });
     } catch (e) {
       setState(() {
         isLoading = false;
-        errorMessage = 'Failed to load movie details.';
+        List<dynamic> cachedData = box.get('movies', defaultValue: []);
+
+        movies = cachedData.map<Movie>((json) {
+          Map<String, dynamic> temp = Map<String, dynamic>.from(json);
+          return Movie.fromJson(temp);
+        }).toList();
+
+        filteredMovies = movies;
       });
     }
   }
@@ -76,9 +86,7 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: isLoading
-          ? Center(
-              child: Text(errorMessage),
-            )
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Padding(
